@@ -1,0 +1,12 @@
+version: '3.9'
+services:
+  app:
+    image: phinixhq/ethereum-fullnode-exporter
+    restart: unless-stopped
+    environment: 
+      REFRESH_INTERVAL_MILLISECONDS: "60000"
+      ETH_FULLNODE_BASE_URL:
+      ETH_SCAN_BASE_URL:
+      COIN_NAME:
+    ports:
+      - "9099:9099"
