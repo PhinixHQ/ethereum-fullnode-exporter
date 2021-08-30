@@ -5,39 +5,39 @@ require('dotenv').config();
 const client = require('prom-client');
 const Web3 = require('web3');
 // URLs
-const ethScanApiUrl = process.env.ETH_SCAN_BASE_URL
-const ethFullNodeUrl = process.env.ETH_FULLNODE_BASE_URL
+const globalBlockbookEndpoint = process.env.GLOBAL_BLOCKBOOK_ENDPOINT
+const FullNodeUrl = process.env.FULLNODE_BASE_URL
 // metrics
-const ethScanUpGauge = new client.Gauge({ name: 'eth_scan_up', help: 'if ethscan is accessible', labelNames: ['coin'] });
-const ethScanCurrentBlockGauge = new client.Gauge({ name: 'eth_scan_current_block', help: 'number of current block', labelNames: ['coin'] });
-const ethScanLastUpdateGauge = new client.Gauge({ name: 'eth_scan_last_update_seconds', help: 'number of latet block', labelNames: ['coin'] });
-const fullnodeUpGauge = new client.Gauge({ name: 'eth_fullnode_up', help: 'if fullNode is accessible', labelNames: ['coin'] });
-const fullnodeCurrentBlockGauge = new client.Gauge({ name: 'eth_fullnode_current_block', help: 'number of current block', labelNames: ['coin'] });
-const fullnodeLastUpdateGauge = new client.Gauge({ name: 'eth_fullnode_last_update_seconds', help: 'number of latest block', labelNames: ['coin'] });
+const GlobalBlockbookUpGauge = new client.Gauge({ name: 'global_blockbook_up', help: 'if global blockbook is accessible', labelNames: ['coin'] });
+const GlobalBlockbookCurrentBlockGauge = new client.Gauge({ name: 'global_blockbook_current_block', help: 'number of current block', labelNames: ['coin'] });
+const GlobalBlockbookLastUpdateGauge = new client.Gauge({ name: 'global_blockbook_last_update_seconds', help: 'last update from the global blockbook', labelNames: ['coin'] });
+const fullnodeUpGauge = new client.Gauge({ name: 'fullnode_up', help: 'if fullNode is accessible', labelNames: ['coin'] });
+const fullnodeCurrentBlockGauge = new client.Gauge({ name: 'fullnode_current_block', help: 'number of current block', labelNames: ['coin'] });
+const fullnodeLastUpdateGauge = new client.Gauge({ name: 'fullnode_last_update_seconds', help: 'last update from the node', labelNames: ['coin'] });
 // get the latest ethScan block number
-async function updateEthScanMetrics(){
+async function updateGlobalBlockbookMetrics(){
     try{
-        const ethScanLatestBlock = await axios.get(ethScanApiUrl, {headers: {'user-agent':'phinix'}});
+        const globalBlockbookLatestBlock = await axios.get(globalBlockbookEndpoint, {headers: {'user-agent':'phinix'}});
         const coinName = process.env.COIN_NAME;
-        ethScanUpGauge.set({ coin: coinName } ,1);
-        ethScanCurrentBlockGauge.set({ coin: coinName } ,ethScanLatestBlock.data.backend.blocks);
-        ethScanLastUpdateGauge.set({ coin: coinName } ,Math.floor(Date.now() / 1000));
+        GlobalBlockbookUpGauge.set({ coin: coinName } ,1);
+        GlobalBlockbookCurrentBlockGauge.set({ coin: coinName } ,globalBlockbookLatestBlock.data.backend.blocks);
+        GlobalBlockbookLastUpdateGauge.set({ coin: coinName } ,Math.floor(Date.now() / 1000));
     }
     catch(err) {
         console.log(err);
-        ethScanUpGauge.set({ coin: process.env.COIN_NAME} ,0);
+        GlobalBlockbookUpGauge.set({ coin: process.env.COIN_NAME} ,0);
     }
 }
 
 // get the latest ethFullnode block number
-async function updateEthFullNodeMetrics(){
+async function updateFullNodeMetrics(){
     try{
-        var web3Provider = new Web3.providers.HttpProvider(ethFullNodeUrl);
+        var web3Provider = new Web3.providers.HttpProvider(FullNodeUrl);
         var web3 = new Web3(web3Provider);
-        const ethFullNOdeLatestBlock = await web3.eth.getBlockNumber();
+        const FullNOdeLatestBlock = await web3.eth.getBlockNumber();
         const coinName = process.env.COIN_NAME;
         fullnodeUpGauge.set({ coin: coinName } ,1);
-        fullnodeCurrentBlockGauge.set({ coin: coinName } ,ethFullNOdeLatestBlock);
+        fullnodeCurrentBlockGauge.set({ coin: coinName } ,FullNOdeLatestBlock);
         fullnodeLastUpdateGauge.set({ coin: coinName } ,Math.floor(Date.now() / 1000));
     }
     catch(err){
@@ -63,7 +63,7 @@ function delay(ms) {
 
 async function main(){
    while(true){
-       await Promise.all([updateEthScanMetrics(), updateEthFullNodeMetrics(), delay(process.env.REFRESH_INTERVAL_MILLISECONDS)]);
+       await Promise.all([updateGlobalBlockbookMetrics(), updateFullNodeMetrics(), delay(process.env.REFRESH_INTERVAL_MILLISECONDS)]);
    }
 }
 
