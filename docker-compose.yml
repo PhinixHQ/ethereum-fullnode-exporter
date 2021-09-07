@@ -7,6 +7,5 @@ services:
       REFRESH_INTERVAL_MILLISECONDS: "60000"
       FULLNODE_BASE_URL:
       GLOBAL_BLOCKBOOK_ENDPOINT:
-      COIN_NAME:
-    ports:
-      - "9099:9099"
+      COIN_NAME: ethereum
+    network_mode: "host"
