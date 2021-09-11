@@ -4,6 +4,7 @@ const app = express();
 require('dotenv').config();
 const client = require('prom-client');
 const Web3 = require('web3');
+axios.defaults.timeout = 4000;
 // URLs
 const globalBlockbookEndpoint = process.env.GLOBAL_BLOCKBOOK_ENDPOINT
 const FullNodeUrl = process.env.FULLNODE_BASE_URL
@@ -17,7 +18,10 @@ const fullnodeLastUpdateGauge = new client.Gauge({ name: 'fullnode_last_update_s
 // get the latest ethScan block number
 async function updateGlobalBlockbookMetrics(){
     try{
+        console.log('starting globalBlockbookLatestBlock');
         const globalBlockbookLatestBlock = await axios.get(globalBlockbookEndpoint, {headers: {'user-agent':'phinix'}});
+        console.log('done globalBlockbookLatestBlock');
+        console.log('///////////////////////////////');
         const coinName = process.env.COIN_NAME;
         GlobalBlockbookUpGauge.set({ coin: coinName } ,1);
         GlobalBlockbookCurrentBlockGauge.set({ coin: coinName } ,globalBlockbookLatestBlock.data.backend.blocks);
@@ -25,6 +29,7 @@ async function updateGlobalBlockbookMetrics(){
     }
     catch(err) {
         console.log(err);
+        console.log('error on globalBlockbookLatestBlock');
         GlobalBlockbookUpGauge.set({ coin: process.env.COIN_NAME} ,0);
     }
 }
@@ -32,9 +37,12 @@ async function updateGlobalBlockbookMetrics(){
 // get the latest ethFullnode block number
 async function updateFullNodeMetrics(){
     try{
+        console.log('starting FullNOdeLatestBlock');
         var web3Provider = new Web3.providers.HttpProvider(FullNodeUrl);
         var web3 = new Web3(web3Provider);
         const FullNOdeLatestBlock = await web3.eth.getBlockNumber();
+        console.log('done FullNOdeLatestBlock');
+        console.log('///////////////////////////////');
         const coinName = process.env.COIN_NAME;
         fullnodeUpGauge.set({ coin: coinName } ,1);
         fullnodeCurrentBlockGauge.set({ coin: coinName } ,FullNOdeLatestBlock);
@@ -42,6 +50,7 @@ async function updateFullNodeMetrics(){
     }
     catch(err){
         console.log(err);
+        console.log('error on FullNOdeLatestBlock');
         fullnodeUpGauge.set({ coin: process.env.COIN_NAME } ,0);
     }
 }
