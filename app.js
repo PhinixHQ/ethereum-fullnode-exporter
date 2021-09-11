@@ -4,7 +4,7 @@ const app = express();
 require('dotenv').config();
 const client = require('prom-client');
 const Web3 = require('web3');
-axios.defaults.timeout = 4000;
+axios.defaults.timeout = parseInt(process.env.AXIOS_TIMEOUT);
 // URLs
 const globalBlockbookEndpoint = process.env.GLOBAL_BLOCKBOOK_ENDPOINT
 const FullNodeUrl = process.env.FULLNODE_BASE_URL
