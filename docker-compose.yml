@@ -9,4 +9,6 @@ services:
       FULLNODE_BASE_URL:
       GLOBAL_BLOCKBOOK_ENDPOINT:
       COIN_NAME: ethereum
+      SENTRY_DSN:
+      SCOPE:
     network_mode: "host"
